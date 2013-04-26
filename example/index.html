@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Cropper</title>
+	<link rel="stylesheet" href="__main.css">
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="../main.js"></script>
+</head>
+<body>
+	    <div class="addphoto__popup js-popup">
+        <a href="#" class="addphoto__popup__exit js-popup__exit"></a>
+        
+        <h3>Редактирование расположения фотографии в других размерах</h3>
+        
+        <div class="addphoto__popup__images">
+            
+            <div class="addphoto__popup__size addphoto__popup__size-630x270">
+                <div class="addphoto__popup__size__crop js-croper" data-size="630x270" style="width: 630px; height: 270px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="630x270">
+                            <span>630x270</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-367x192">
+                <div class="addphoto__popup__size__crop js-croper" data-size="367x192" style="width: 367px; height: 192px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="367x192">
+                            <span>367x192</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="367x192">
+                           <a tabindex="-1" href="#">367x192</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </div>
+            
+            <div class="clear"></div>
+            
+            <div class="addphoto__popup__size 215x215">
+                <div class="addphoto__popup__size__crop js-croper" data-size="215x215" style="width: 215px; height: 215px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="215x215">
+                            <span>215x215</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="170x170">
+                            <span>170x170</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="110x110">
+                            <span>110x110</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="86x86">
+                            <span>86x86</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="80x80">
+                            <span>80x80</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="76x76">
+                            <span>76x76</span>
+                        </li>
+                    </ul>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="215x215">
+                           <a tabindex="-1" href="#">215x215</a>
+                        </li>
+                        <li class="js-croper-size" data-size="170x170">
+                            <a tabindex="-1" href="#">170x170</a>
+                        </li>
+                        <li class="js-croper-size" data-size="110x110">
+                            <a tabindex="-1" href="#">110x110</a>
+                        </li>
+                        <li class="js-croper-size" data-size="86x86">
+                            <a tabindex="-1" href="#">86x86</a>
+                        </li>
+                        <li class="js-croper-size" data-size="80x80">
+                            <a tabindex="-1" href="#">80x80</a>
+                        </li>
+                        <li class="js-croper-size" data-size="76x76">
+                            <a tabindex="-1" href="#">76x76</a>
+                        </li>
+                    </ul>
+                </div>
+                
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-312x180">
+                <div class="addphoto__popup__size__crop js-croper" data-size="312x180" style="width: 312px; height: 180px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="312x180">
+                            <span>312x180</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="630x360">
+                            <span>630x360</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="312x180">
+                           <a tabindex="-1" href="#">312x180</a>
+                        </li>
+                        <li class="active js-croper-size" data-size="630x360">
+                           <a tabindex="-1" href="#">630x360</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-112x192">
+                <div class="addphoto__popup__size__crop js-croper" data-size="112x192" style="width: 112px; height: 192px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="112x192">
+                            <span>112x192</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="112x192">
+                           <a tabindex="-1" href="#">112x192</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-220x164">
+                <div class="addphoto__popup__size__crop js-croper" data-size="220x164" style="width: 220px; height: 164px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="220x164">
+                            <span>220x164</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="220x164">
+                           <a tabindex="-1" href="#">220x164</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-76x100">
+                <div class="addphoto__popup__size__crop js-croper" data-size="76x100" style="width: 76px; height: 100px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="76x100">
+                            <span>76x100</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="76x100">
+                           <a tabindex="-1" href="#">76x100</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="clear"></div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-143x97">
+                <div class="addphoto__popup__size__crop js-croper" data-size="143x97" style="width: 143px; height: 97px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="143x97">
+                            <span>143x97</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="304x216">
+                            <span>304x216</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="143x97">
+                           <a tabindex="-1" href="#">143x97</a>
+                        </li>
+                        <li class="js-croper-size" data-size="304x216">
+                           <a tabindex="-1" href="#">304x216</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="addphoto__popup__size addphoto__popup__size-130x100">
+                <div class="addphoto__popup__size__crop js-croper" data-size="130x100" style="width: 130px; height: 100px;">
+                    <ul class="addphoto__popup__size__crop__zoomer js-croper-zoomer">
+                        <li class="js-croper-zoomer-in" title="shift+mouseScroll">+</li>
+                        <li class="js-croper-zoomer-out" title="shift+mouseScroll">&ndash;</li>
+                    </ul>
+                    
+                    <img src="http://cdn.voboyah.com/img/33590-1920x1200.jpg" alt="" class="js-croper-image">
+                    
+                    <ul class="addphoto__popup__size__list-sizes js-croper-sizes">
+                        <li class="addphoto__popup__size__list-sizes__size active js-croper-size" data-size="130x100">
+                            <span>130x100</span>
+                        </li>
+                        <li class="addphoto__popup__size__list-sizes__size js-croper-size" data-size="243x192">
+                            <span>243x192</span>
+                        </li>
+                    </ul>
+                    
+                    <button class="btn btn-mini btn-inverse dropdown-toggle js-croper-dropdown-btn"><span class="caret"></span></button>
+                    
+                    <ul class="addphoto__popup__size__ctxmenu  js-croper-ctxmenu dropdown-menu">
+                        <li class="active js-croper-size" data-size="130x100">
+                           <a tabindex="-1" href="#">130x100</a>
+                        </li>
+                        <li class="js-croper-size" data-size="243x192">
+                           <a tabindex="-1" href="#">243x192</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>            
+        </div>
+        
+        <div class="addphoto__popup__footer navbar navbar-inner">
+            <button class="btn btn-primary add-photo__popup__footer-save">Сохранить изменения</button>
+            <a href="#" class="addphoto__popup__footer-cancel">Отмена</a>
+        </div>
+    </div> <!-- //popup -->
+    
+    <script>
+    	$('.js-croper').Croper({animate:true});
+    </script>
+</body>
+</html>

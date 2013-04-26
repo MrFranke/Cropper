@@ -1,0 +1,6 @@
+{
+    "name": "cropper"
+  , "description": "Allows to move and zoom image for cropping."
+  , "version": "0.0.1"
+  , "keywords": ["image", "cropping", "resize"]
+}
