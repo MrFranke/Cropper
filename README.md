@@ -6,6 +6,7 @@ Cropper
 Можно зумить и перемещать фото.
 
 ```javascript
-$('.js-croper').Croper({animate:true});
+var croper = $('.js-croper').Croper();  // Инициализируем плагин
+croper.setZoom(0.5);  // Уменьшаем картинку на половину
 ```
 
