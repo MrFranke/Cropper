@@ -4,8 +4,8 @@ $.fn.Croper = function( options ) {
 
     var settings = $.extend({
         CSS_CLASS: 'js-croper',
-        zoomStep: 0.05,
-        animate: false,
+        zoomStep: {in: 1.1, out: 0.9 },
+        animate: true,
         maxWidthSizeMenu: 170,
         ctxmenu: false
     }, options);
@@ -17,12 +17,8 @@ $.fn.Croper = function( options ) {
           , width
           , height
           , coords
-          , zoom
+          , scale
           , ctx
-
-          // Размеры картинки с учетом зума
-          , zoomWidth
-          , zoomHeight
 
           // Размеры враппера
           , wrapWidth
@@ -43,15 +39,12 @@ $.fn.Croper = function( options ) {
           , visibleGUI = true
           ;
 
-        function init ( update ) {
+        function init () {
             updateVars();
+            bindEvents();
+            $crope.css({overflow: 'visible'}); // Убираем overflow для нормальной работы контекстного меню
+            toggleGUI();    // Проверяем нужно ли скрывать интерфейс
             drawImg();
-
-            if ( !update ) {
-                bindEvents();
-                $crope.css({overflow: 'visible'}); // Убираем overflow для нормальной работы контекстного меню
-                toggleGUI();
-            }
         }
 
         function bindEvents () {
@@ -64,7 +57,7 @@ $.fn.Croper = function( options ) {
             $sizeItem.bind('click.cropper', changeSize);
 
             if (settings.ctxmenu) {
-                $crope.bind('contextmenu.cropper', ctxmenu);
+                $crope.bind('ctxmenu.cropper', ctxmenu);
             }
 
             $dropdownBtn.bind('click.cropper', dropdown);
@@ -79,51 +72,14 @@ $.fn.Croper = function( options ) {
 
             $sizeItem.unbind('click.cropper');
             
-            $crope.unbind('contextmenu.cropper');
+            $crope.unbind('ctxmenu.cropper');
             $dropdownBtn.unbind('click.cropper');
         }
 
         function updateVars () {
             $img = $crope.find('.'+settings.CSS_CLASS+'-image');
-
+            
             $ctxmenu = $crope.find('.'+settings.CSS_CLASS+'-ctxmenu');
-            
-            width = $img.width();
-            height = $img.height();
-
-            wrapWidth = $crope.width();
-            wrapHeight = $crope.height();
-
-            $dropdownBtn = $crope.find('.'+settings.CSS_CLASS+'-dropdown-btn');
-
-            
-            /**
-             * Если координаты и зум уже были установленны, то не перезаписываем их
-             * Это нужно для повторной инициализации канваса при изменении размеров.
-             */
-            if ( !coords && !zoom ) {
-                // Получаем координаты рисунка (если нет data-атребутов и нет значений left и top, то x = y = 0)
-                coords = {
-                    x: $crope.data('x') || $img.css('left'),
-                    y: $crope.data('y') || $img.css('top')
-                };
-
-                // Если координаты не передали, центрируем рисунок
-                if ( coords.x === 'auto' && coords.y === 'auto' ) {
-                    coords.x = -(width/2-wrapWidth/2);
-                    coords.y = -(height/2-wrapHeight/2);
-                    console.log(coords);
-                }
-
-                zoom = $crope.data('zoom') || 1;
-
-            }
-
-            zoomWidth = width*zoom;
-            zoomHeight = height*zoom;
-
-            // Заменяем картинки на canvas
-            replaceImgOnCanvas();
 
             $zoomer = $crope.find('.'+settings.CSS_CLASS+'-zoomer');
             $zoomerIn = $crope.find('.'+settings.CSS_CLASS+'-zoomer-in');
@@ -131,6 +87,31 @@ $.fn.Croper = function( options ) {
 
             $sizeList = $crope.find('.'+settings.CSS_CLASS+'-sizes');
             $sizeItem = $crope.find('.'+settings.CSS_CLASS+'-size');
+
+            $dropdownBtn = $crope.find('.'+settings.CSS_CLASS+'-dropdown-btn');
+            
+            width = $img.width();
+            height = $img.height();
+
+            wrapWidth = $crope.width();
+            wrapHeight = $crope.height();
+            
+            // Получаем координаты из data-* аттребутов или из позиционирования рисунка
+            coords = {
+                x: $crope.data('x') || $img.css('left'),
+                y: $crope.data('y') || $img.css('top')
+            };
+
+            scale = $crope.data('zoom') || 1;
+
+            // Заменяем картинки на canvas
+            replaceImgOnCanvas();
+
+            // Если координаты не передали, центрируем рисунок
+            if ( coords.x === 'auto' && coords.y === 'auto' ) {
+                coords.x = 0;
+                coords.y = 0;
+            }
         }
 
         /**
@@ -140,20 +121,19 @@ $.fn.Croper = function( options ) {
         function replaceImgOnCanvas () {
             var canvas = document.createElement('canvas');
 
-            $canvas = $( canvas );
-            $canvas
-                .attr({
-                    width: wrapWidth,
-                    height: wrapHeight
-                })
-                .addClass(settings.CSS_CLASS+'-canvas');
-
-            $crope.append($canvas);
+            $crope.append(canvas);
             $img.hide();
             
             if ( isIE ) {
-                canvas = G_vmlCanvasManager.initElement( $canvas.get(0) ); // Fix для IE
+                canvas = G_vmlCanvasManager.initElement( canvas ); // Fix для IE
             }
+
+            $canvas = $( canvas )
+                        .attr({
+                            width: wrapWidth,
+                            height: wrapHeight
+                        })
+                        .addClass(settings.CSS_CLASS+'-canvas');
 
             return ctx = canvas.getContext('2d');
         }
@@ -163,35 +143,36 @@ $.fn.Croper = function( options ) {
          * @method drawImg
          */
         function drawImg () {
-            var z = Math.abs(zoom);
-            ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height ); // Отчищаем канвас с учетом смещения осей
-            ctx.drawImage($img.get(0), coords.x, coords.y, zoomWidth, zoomHeight);
+            ctx.save();
+            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.restore();
+            ctx.drawImage($img.get(0), 0, 0);
         }
 
         /**
-         * Зумит изображение
-         * @param z {Number} то, на сколько увеличивается zoom
-         * @param e {Object} координаты мыши {x,y}
+         * Зумит изображение к определенным координатам
+         * @param x {Number} координата X
+         * @param y {Number} координата Y
+         * @param z {Number} то, на сколько увеличивается scale
          */
-        function zoomer (z, c) {
-            // Зум не может быть отрицательным
-            if ( zoom > 0 ) {
-                // Кешируем размеры с учетом зума
-                var w = zoomWidth
-                  , h = zoomHeight;
+        function zoomTo (x,y,z) {
+            var x = -( x / scale + coords.x - x / ( scale * z ) )
+              , y = -( y / scale + coords.y - y / ( scale * z ) );
 
-                zoomWidth = width * Math.abs(zoom);
-                zoomHeight = height * Math.abs(zoom);
+            move(coords.x,coords.y);
+            ctx.scale(z,z);
+            move(x,y);
+            scale *= z;
+            console.log( coords );
+        }
 
-                
-                // Смещаем картинку для цетрирования при зуме
-                if (!c) {
-                    move(  -((zoomWidth-w)/2), -((zoomHeight-h)/2)  );
-                }else{
-                    move(  -((zoomWidth-w)/2), -((zoomHeight-h)/2)  );
-                    //move(  -((zoomWidth-w)/2)+(c.x-(zoomWidth-w)/2), -((zoomHeight-h)/2)+(c.y-(zoomHeight-h)/2)  );
-                }
-            }
+        /**
+         * Увеличивает зум
+         */
+        function zooming (s) {
+            scale = s;
+            ctx.scale(s,s);
             drawImg();
         }
 
@@ -200,8 +181,10 @@ $.fn.Croper = function( options ) {
          * @param x,y {Number} то, на сколько смещается картинка
          */
         function move (x,y) {
-            coords.x += x;
-            coords.y += y;
+            ctx.translate(x,y);
+            coords.x += -x;
+            coords.y += -y;
+            drawImg();
         }
 
         /*============================ Обработка событий =============================*/
@@ -239,13 +222,12 @@ $.fn.Croper = function( options ) {
             $(document).bind('mousemove.cropper', function (e) {
                 var x = e.clientX
                   , y = e.clientY
-                  , newX = (oldX - x)*-1
-                  , newY = (oldY - y)*-1
+                  , newX = -(oldX - x)
+                  , newY = -(oldY - y)
                   ;
 
                 // Перемещаем объект
-                move(newX, newY);
-
+                move(newX/scale, newY/scale);
                 // Перерисовываем картинку
                 drawImg();
 
@@ -259,18 +241,13 @@ $.fn.Croper = function( options ) {
 
         function scroll (e) {
             var willDir = e.originalEvent.wheelDelta > 0
-              , c = {
-                    x: -e.originalEvent.offsetX,
-                    y: -e.originalEvent.offsetY
-                };
-
+              , x = e.originalEvent.offsetX
+              , y = e.originalEvent.offsetY
             if ( e.shiftKey ) {
                 if ( willDir ) {
-                    zoom += settings.zoomStep;
-                    zoomer(zoom,c);
+                    zoomTo(x, y, settings.zoomStep.in)
                 }else{
-                    zoom -= settings.zoomStep;
-                    zoomer(zoom,c);
+                    zoomTo(x, y, settings.zoomStep.out)
                 }
                 return false;
             }
@@ -278,12 +255,12 @@ $.fn.Croper = function( options ) {
         }
 
         function scollIn () {
-            zoomer(zoom += settings.zoomStep);
+            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.in)
             return false;
         }
 
         function scollOut () {
-            zoomer(zoom -= settings.zoomStep);
+            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.out)
             return false;
         }
 
@@ -306,6 +283,7 @@ $.fn.Croper = function( options ) {
             $ctxmenu.toggle();
         }
 
+
         /*================ API ==================*/
 
         /**
@@ -316,12 +294,19 @@ $.fn.Croper = function( options ) {
          */
         function getParams () {
             return {
-                coords: coords,
-                size  : {
-                    w: zoomWidth,
-                    h: zoomHeight
+                coords: {
+                    x : -coords.x,
+                    y : -coords.y
                 },
-                zoom  : zoom
+                originalSize:{
+                    w: width,
+                    h: height
+                },
+                size  : {
+                    w: wrapWidth,
+                    h: wrapHeight
+                },
+                zoom  : scale
             }
         }
 
@@ -342,26 +327,10 @@ $.fn.Croper = function( options ) {
          * @public
          */
         function setSize (w,h) {
-            var diff = {
-                w: (wrapWidth-w)/2,
-                h: (wrapHeight-h)/2,
-            };
-            
-            coords.x += -diff.w;
-            coords.y += -diff.h;
-
-            zoom = wrapWidth/w
-
-            wrapWidth = w;
-            wrapHeight = h;
-            ctx.canvas.width = w;
-            ctx.canvas.height = w;
-
             toggleGUI();
 
             if ( typeof settings.animate === 'function' ) {
-                settings.animate( $crope, $canvas );
-                update();
+                settings.animate( $crope, $canvas, update );
                 return this;
             }
 
@@ -370,7 +339,18 @@ $.fn.Croper = function( options ) {
                     width : w,
                     height: h
                 }, function () {
-                    update();
+                    console.log(w);
+                    console.log(ctx.canvas.width);
+                    var diff = ctx.canvas.width/w
+                      , oldWidth = ctx.canvas.width
+                      , oldHeight = ctx.canvas.height;
+
+                    ctx.canvas.width = w;
+                    ctx.canvas.height = h;
+
+                    zoomTo(0,0,diff);
+                    //ctx.setTransform( scale, 0, 0, scale, 0, 0 );
+                    drawImg();
                 });
 
                 return this;
@@ -381,7 +361,6 @@ $.fn.Croper = function( options ) {
                 height: h
             });
             
-            update();
         }
 
         /**
@@ -391,6 +370,7 @@ $.fn.Croper = function( options ) {
          * @public
          */
         function setCoords (x,y) {
+            ctx.setTransform( scale, 0, 0, scale, -x, -y );
             coords.x = -x;
             coords.y = -y;
             drawImg();
@@ -398,8 +378,7 @@ $.fn.Croper = function( options ) {
         }
 
         function setZoom (z) {
-            zoom = z;
-            zoomer(zoom);
+            zooming(z);
             return this;
         }
 
@@ -438,10 +417,13 @@ $.fn.Croper = function( options ) {
             return this;
         }
 
+        // Сбрасывает координаты окна и зум
         function update () {
-            $canvas.remove();
-            init('update');
-
+            coords.x = 0;
+            coords.y = 0;
+            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.drawImage($img.get(0), 0, 0);
             return this;
         }
 
