@@ -1,3 +1,5 @@
+(function( $ ) {
+
 $.fn.Croper = function( options ) {
 
     var settings = $.extend({
@@ -99,7 +101,7 @@ $.fn.Croper = function( options ) {
                 x: $crope.data('x') || $img.css('left'),
                 y: $crope.data('y') || $img.css('top')
             };
-
+            
             scale = $crope.data('zoom') || 1;
 
             // Заменяем картинки на canvas
@@ -113,6 +115,7 @@ $.fn.Croper = function( options ) {
 
             // Устанавливаем зум
             zooming(scale);
+            move(-coords.x, -coords.y);
         }
 
         /**
@@ -361,10 +364,10 @@ $.fn.Croper = function( options ) {
 
                     zoomer(diff);
                     
-
-                    //ctx.setTransform( scale, 0, 0, scale, -coords.x, -coords.y );
-                    //drawImg();
-                    move((w-oldWidth)/2, (h-oldHeight)/2)
+                    // Я не знаю как это работает, но если после увелицения сместить координаты на самих себя,
+                    // то картинка центрируется 
+                    ctx.translate(-coords.x,-coords.y);
+                    drawImg();
                 });
 
                 return this;
