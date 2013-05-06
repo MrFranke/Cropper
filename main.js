@@ -1,5 +1,3 @@
-(function( $ ) {
-
 $.fn.Croper = function( options ) {
 
     var settings = $.extend({
@@ -112,6 +110,9 @@ $.fn.Croper = function( options ) {
                 coords.x = 0;
                 coords.y = 0;
             }
+
+            // Устанавливаем зум
+            zooming(scale);
         }
 
         /**
@@ -164,15 +165,25 @@ $.fn.Croper = function( options ) {
             ctx.scale(z,z);
             move(x,y);
             scale *= z;
-            console.log( coords );
         }
 
         /**
-         * Увеличивает зум
+         * Увеличивает или уменьшает зум на переданное число
+         * @param z {Number} то, на сколько увеличиваем или уменьшаем зум
          */
-        function zooming (s) {
-            scale = s;
-            ctx.scale(s,s);
+        function zoomer (z) {
+            scale *= z;
+            ctx.scale(scale, scale);
+            drawImg();
+        }
+
+        /**
+         * Устанавливает зум
+         * @param z {Number} новое значение зума
+         */
+        function zooming (z) {
+            scale = z;
+            ctx.scale(z,z);
             drawImg();
         }
 
@@ -327,6 +338,8 @@ $.fn.Croper = function( options ) {
          * @public
          */
         function setSize (w,h) {
+            wrapWidth = w;
+            wrapHeight = h;
             toggleGUI();
 
             if ( typeof settings.animate === 'function' ) {
@@ -339,18 +352,19 @@ $.fn.Croper = function( options ) {
                     width : w,
                     height: h
                 }, function () {
-                    console.log(w);
-                    console.log(ctx.canvas.width);
-                    var diff = ctx.canvas.width/w
+                    var diff = w/ctx.canvas.width
                       , oldWidth = ctx.canvas.width
                       , oldHeight = ctx.canvas.height;
 
                     ctx.canvas.width = w;
                     ctx.canvas.height = h;
 
-                    zoomTo(0,0,diff);
-                    //ctx.setTransform( scale, 0, 0, scale, 0, 0 );
-                    drawImg();
+                    zoomer(diff);
+                    
+
+                    //ctx.setTransform( scale, 0, 0, scale, -coords.x, -coords.y );
+                    //drawImg();
+                    move((w-oldWidth)/2, (h-oldHeight)/2)
                 });
 
                 return this;
@@ -360,6 +374,7 @@ $.fn.Croper = function( options ) {
                 width : w,
                 height: h
             });
+
             
         }
 
