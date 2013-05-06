@@ -113,9 +113,11 @@ $.fn.Croper = function( options ) {
                 coords.y = 0;
             }
 
-            // Устанавливаем зум
+            // Устанавливаем зум и координаты
             zooming(scale);
-            move(-coords.x, -coords.y);
+            ctx.translate(-coords.x, -coords.y);
+            drawImg();
+
         }
 
         /**
@@ -309,8 +311,8 @@ $.fn.Croper = function( options ) {
         function getParams () {
             return {
                 coords: {
-                    x : -coords.x,
-                    y : -coords.y
+                    x : coords.x,
+                    y : coords.y
                 },
                 originalSize:{
                     w: width,
@@ -341,31 +343,22 @@ $.fn.Croper = function( options ) {
          * @public
          */
         function setSize (w,h) {
+            var diff = w/ctx.canvas.width;
             wrapWidth = w;
             wrapHeight = h;
-            toggleGUI();
 
-            if ( typeof settings.animate === 'function' ) {
-                settings.animate( $crope, $canvas, update );
-                return this;
-            }
+            toggleGUI();
 
             if ( settings.animate ) {
                 $crope.animate({
                     width : w,
                     height: h
                 }, function () {
-                    var diff = w/ctx.canvas.width
-                      , oldWidth = ctx.canvas.width
-                      , oldHeight = ctx.canvas.height;
-
                     ctx.canvas.width = w;
                     ctx.canvas.height = h;
 
                     zoomer(diff);
                     
-                    // Я не знаю как это работает, но если после увелицения сместить координаты на самих себя,
-                    // то картинка центрируется 
                     ctx.translate(-coords.x,-coords.y);
                     drawImg();
                 });
@@ -378,7 +371,15 @@ $.fn.Croper = function( options ) {
                 height: h
             });
 
+            ctx.canvas.width = w;
+            ctx.canvas.height = h;
+
+            zoomer(diff);
             
+            ctx.translate(-coords.x,-coords.y);
+            drawImg();
+
+            return this;
         }
 
         /**
@@ -431,12 +432,15 @@ $.fn.Croper = function( options ) {
         function destroy () {
             unbindEvents();
             $canvas.remove();
+            $img.show();
 
             return this;
         }
 
-        // Сбрасывает координаты окна и зум
-        function update () {
+        /**
+         * Сбрасывает координаты окна и зум
+         */ 
+        function restore () {
             coords.x = 0;
             coords.y = 0;
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
@@ -461,7 +465,7 @@ $.fn.Croper = function( options ) {
             showGUI  : showGUI,
 
             destroy  : destroy,
-            update   : update
+            restore   : restore
         }
     }
 
