@@ -38,6 +38,7 @@ $.fn.Croper = function( options ) {
           // Проверки 
           , isIE = '\v'=='v'
           , visibleGUI = true
+          , startCoords
           ;
 
         function init () {
@@ -110,15 +111,17 @@ $.fn.Croper = function( options ) {
             
             scale = $crope.data('zoom') || 1;
 
-            // Заменяем картинки на canvas
-            replaceImgOnCanvas();
-
             // Если координаты не передали, центрируем рисунок
             if ( coords.x === 'auto' && coords.y === 'auto' ) {
                 coords.x = 0;
                 coords.y = 0;
             }
 
+
+            // Заменяем картинки на canvas
+            replaceImgOnCanvas();
+
+            
             // Устанавливаем зум и координаты
             zooming(scale);
         }
@@ -154,27 +157,44 @@ $.fn.Croper = function( options ) {
         function IEfixed () {
             if (!isIE) {return false}
 
-            // Эмулируем смещение координатной сетки при методе ctx.translate
+            // Эти координаты нужны для эмулирования координатной сетки.
             startCoords = {
-                x: 0,
-                y: 0
+                x : 0,
+                y : 0
             }
 
-            // Заменяем нерабочие функции canvas в IE
+            // Заменяем нерабочие функции excanvas в IE
             ctx.setTransform = function (scaleX, offsetX, offsetY, scaleY, x, y) {
-                /*startCoords = {x: x,y: y};
+                startCoords = {x: x,y: y};
                 
                 zoomWidth = $img.width()*scaleX;
-                zoomHeight = $img.height()*scaleY;*/
+                zoomHeight = $img.height()*scaleY;
 
                 return false;
             }
-            ctx.scale = function (x,y) {
+            
+            /**
+             * Этот метод немного отличаетсмя от стандартного scale.
+             */
+            ctx.scale = function (x,y,increase) {
+                
+            // Этот очень грязный хак для IE.
+            // При setSize() метод scale увеличивает картинку относительно ее начальных размеров
+            // , а не относительно уже измененных.
+            // Я не смог понять причину такого странного поведения =С
+                if ( increase ) {
+                    zoomWidth = width*x;
+                    zoomHeight = height*y;
+                    return false;
+                }
+
                 zoomWidth *= x;
                 zoomHeight *= y;
+
                 return false;
             }
             ctx.translate = function ( x,y ) {
+                console.log('startCoords.x: ', startCoords.x);
                 startCoords.x += x;
                 startCoords.y += y;
                 return false;
@@ -192,6 +212,7 @@ $.fn.Croper = function( options ) {
         function drawImg () {            
             if ( isIE ) {
                 // Координаты с учетом зума для эмулиции scale
+                console.log(startCoords.x);
                 var x = (startCoords.x*scale)
                   , y = (startCoords.y*scale);
 
@@ -211,7 +232,7 @@ $.fn.Croper = function( options ) {
          * Метод нужен для скролла мышкой
          * @param x {Number} координата X
          * @param y {Number} координата Y
-         * @param z {Number} то, на сколько увеличивается scale
+         * @param z {Number} то, на сколько увеличивается картинка
          */
         function zoomTo (x,y,z) {
             var x = -( x / scale + coords.x - x / ( scale * z ) )
@@ -229,8 +250,8 @@ $.fn.Croper = function( options ) {
          */
         function zoomer (z) {
             scale *= z;
-            ctx.scale(scale, scale);
-            ctx.translate(-coords.x, -coords.y);
+            ctx.scale(scale, scale, 'increase');
+            if (!isIE) {ctx.translate(-coords.x, -coords.y);} // Для IE не нужно смещать координаты, что бы выровнять картинку
             drawImg();
         }   
 
@@ -277,7 +298,7 @@ $.fn.Croper = function( options ) {
         }
 
         function mouseMove (e) {
-            // Когда отпускаем мышку - перестаем 
+            // Когда отпускаем мышку - перестаем двигать картинку
             $(document).bind('mouseup.cropper', function () {
                 $(document).unbind('mousemove.cropper');
                 $(document).unbind('mouseup.cropper');
@@ -312,7 +333,7 @@ $.fn.Croper = function( options ) {
               , y = e.originalEvent.offsetY
               ;
 
-            // IE берет кординаты не canvas, а div-a который вложен в canvas
+            // IE берет кординаты не canvas, а div-a кординатыорый вложен в canvas
             // По этому нужно рассчитат координаты c четом отступа div-a
             if (  isIE ) {
                 var offsetX = parseInt($(e.currentTarget).find('group').css('left'), 10)
@@ -353,7 +374,6 @@ $.fn.Croper = function( options ) {
             $ctxmenu.find('li').eq( $(this).index() ).addClass( 'active' );
 
             $ctxmenu.hide();
-
             return false;
         }
 
@@ -536,7 +556,7 @@ $.fn.Croper = function( options ) {
     // Проходимся по всем элементам
     this.each(function () {
         var croper = new Croper( $(this) );
-        croper.init(); // Запускаем Cropper
+        setTimeout(croper.init, 500);
         setOfCroper.push( croper );
     });
 
