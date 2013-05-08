@@ -4,7 +4,7 @@ $.fn.Croper = function( options ) {
 
     var settings = $.extend({
         CSS_CLASS: 'js-croper',
-        zoomStep: {in: 1.1, out: 0.9 },
+        zoomStep: {zoomIn: 1.1, zoomOut: 0.9 },
         animate: true,
         maxWidthSizeMenu: 170,
         ctxmenu: false
@@ -35,6 +35,7 @@ $.fn.Croper = function( options ) {
           , $ctxmenu
           , $dropdownBtn
 
+          // Проверки 
           , isIE = '\v'=='v'
           , visibleGUI = true
           ;
@@ -61,6 +62,11 @@ $.fn.Croper = function( options ) {
             }
 
             $dropdownBtn.bind('click.cropper', dropdown);
+
+            // после загрузки отрисовываем картинку            
+            $img.load(function(){
+                drawImg();
+            });
         }
 
         function unbindEvents () {
@@ -98,8 +104,8 @@ $.fn.Croper = function( options ) {
             
             // Получаем координаты из data-* аттребутов или из позиционирования рисунка
             coords = {
-                x: $crope.data('x') || $img.css('left'),
-                y: $crope.data('y') || $img.css('top')
+                x: $crope.data('x')*1 || $img.css('left'),
+                y: $crope.data('y')*1 || $img.css('top')
             };
             
             scale = $crope.data('zoom') || 1;
@@ -115,9 +121,6 @@ $.fn.Croper = function( options ) {
 
             // Устанавливаем зум и координаты
             zooming(scale);
-            ctx.translate(-coords.x, -coords.y);
-            drawImg();
-
         }
 
         /**
@@ -141,23 +144,71 @@ $.fn.Croper = function( options ) {
                         })
                         .addClass(settings.CSS_CLASS+'-canvas');
 
-            return ctx = canvas.getContext('2d');
+            
+            ctx = canvas.getContext('2d');
+            IEfixed();
+            drawImg();
+            return ctx;
+        }
+
+        function IEfixed () {
+            if (!isIE) {return false}
+
+            // Эмулируем смещение координатной сетки при методе ctx.translate
+            startCoords = {
+                x: 0,
+                y: 0
+            }
+
+            // Заменяем нерабочие функции canvas в IE
+            ctx.setTransform = function (scaleX, offsetX, offsetY, scaleY, x, y) {
+                /*startCoords = {x: x,y: y};
+                
+                zoomWidth = $img.width()*scaleX;
+                zoomHeight = $img.height()*scaleY;*/
+
+                return false;
+            }
+            ctx.scale = function (x,y) {
+                zoomWidth *= x;
+                zoomHeight *= y;
+                return false;
+            }
+            ctx.translate = function ( x,y ) {
+                startCoords.x += x;
+                startCoords.y += y;
+                return false;
+            }
+
+
+            zoomWidth = $img.width()*scale;
+            zoomHeight = $img.height()*scale;
         }
 
         /**
          * Перерисовывает холст
          * @method drawImg
          */
-        function drawImg () {
-            ctx.save();
-            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-            ctx.restore();
-            ctx.drawImage($img.get(0), 0, 0);
+        function drawImg () {            
+            if ( isIE ) {
+                // Координаты с учетом зума для эмулиции scale
+                var x = (startCoords.x*scale)
+                  , y = (startCoords.y*scale);
+
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.drawImage($img.get(0), x, y, zoomWidth, zoomHeight);
+            }else{
+                ctx.save();
+                ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.restore();
+                ctx.drawImage($img.get(0), 0, 0);
+            }
         }
 
         /**
-         * Зумит изображение к определенным координатам
+         * Постепенно зумит изображение к определенным координатам.
+         * Метод нужен для скролла мышкой
          * @param x {Number} координата X
          * @param y {Number} координата Y
          * @param z {Number} то, на сколько увеличивается scale
@@ -166,7 +217,7 @@ $.fn.Croper = function( options ) {
             var x = -( x / scale + coords.x - x / ( scale * z ) )
               , y = -( y / scale + coords.y - y / ( scale * z ) );
 
-            move(coords.x,coords.y);
+            move(coords.x, coords.y);
             ctx.scale(z,z);
             move(x,y);
             scale *= z;
@@ -179,8 +230,9 @@ $.fn.Croper = function( options ) {
         function zoomer (z) {
             scale *= z;
             ctx.scale(scale, scale);
+            ctx.translate(-coords.x, -coords.y);
             drawImg();
-        }
+        }   
 
         /**
          * Устанавливает зум
@@ -189,6 +241,7 @@ $.fn.Croper = function( options ) {
         function zooming (z) {
             scale = z;
             ctx.scale(z,z);
+            ctx.translate(-coords.x, -coords.y);
             drawImg();
         }
 
@@ -244,8 +297,6 @@ $.fn.Croper = function( options ) {
 
                 // Перемещаем объект
                 move(newX/scale, newY/scale);
-                // Перерисовываем картинку
-                drawImg();
 
                 // Обновляем координаты
                 oldX = x;
@@ -259,11 +310,22 @@ $.fn.Croper = function( options ) {
             var willDir = e.originalEvent.wheelDelta > 0
               , x = e.originalEvent.offsetX
               , y = e.originalEvent.offsetY
+              ;
+
+            // IE берет кординаты не canvas, а div-a который вложен в canvas
+            // По этому нужно рассчитат координаты c четом отступа div-a
+            if (  isIE ) {
+                var offsetX = parseInt($(e.currentTarget).find('group').css('left'), 10)
+                  , offsetY = parseInt($(e.currentTarget).find('group').css('top'), 10);
+                x += offsetX;
+                y += offsetY;
+            }
+
             if ( e.shiftKey ) {
                 if ( willDir ) {
-                    zoomTo(x, y, settings.zoomStep.in)
+                    zoomTo(x, y, settings.zoomStep.zoomIn);
                 }else{
-                    zoomTo(x, y, settings.zoomStep.out)
+                    zoomTo(x, y, settings.zoomStep.zoomOut);
                 }
                 return false;
             }
@@ -271,12 +333,12 @@ $.fn.Croper = function( options ) {
         }
 
         function scollIn () {
-            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.in)
+            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.zoomIn);
             return false;
         }
 
         function scollOut () {
-            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.out)
+            zoomTo(wrapWidth/2, wrapHeight/2, settings.zoomStep.zoomOut);
             return false;
         }
 
@@ -322,6 +384,7 @@ $.fn.Croper = function( options ) {
                     w: wrapWidth,
                     h: wrapHeight
                 },
+                img: $img,
                 zoom  : scale
             }
         }
@@ -343,6 +406,10 @@ $.fn.Croper = function( options ) {
          * @public
          */
         function setSize (w,h) {
+            if ( wrapWidth === w && wrapHeight === h ) {
+                return false;
+            }
+
             var diff = w/ctx.canvas.width;
             wrapWidth = w;
             wrapHeight = h;
@@ -358,9 +425,6 @@ $.fn.Croper = function( options ) {
                     ctx.canvas.height = h;
 
                     zoomer(diff);
-                    
-                    ctx.translate(-coords.x,-coords.y);
-                    drawImg();
                 });
 
                 return this;
@@ -375,9 +439,6 @@ $.fn.Croper = function( options ) {
             ctx.canvas.height = h;
 
             zoomer(diff);
-            
-            ctx.translate(-coords.x,-coords.y);
-            drawImg();
 
             return this;
         }
@@ -450,7 +511,7 @@ $.fn.Croper = function( options ) {
         }
 
 
-        init();
+        
 
         return{
             getParams: getParams,
@@ -465,7 +526,8 @@ $.fn.Croper = function( options ) {
             showGUI  : showGUI,
 
             destroy  : destroy,
-            restore   : restore
+            restore  : restore,
+            init     : init
         }
     }
 
@@ -474,7 +536,7 @@ $.fn.Croper = function( options ) {
     // Проходимся по всем элементам
     this.each(function () {
         var croper = new Croper( $(this) );
-        
+        croper.init(); // Запускаем Cropper
         setOfCroper.push( croper );
     });
 
