@@ -1,3 +1,4 @@
+
 (function( $ ) {
 
 $.fn.Croper = function( options ) {
