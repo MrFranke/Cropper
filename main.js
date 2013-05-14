@@ -36,9 +36,13 @@ $.fn.Croper = function( options ) {
           , $dropdownBtn
 
           // Проверки 
-          , isIE = '\v'=='v'
+          , isIE = !document.createElement('canvas').getContext // Проверяем на наличее APi canvas-a
           , visibleGUI = true
+
+          // Для IE
           , startCoords
+          , zoomWidth
+          , zoomHeight
           ;
 
         function init () {
@@ -163,12 +167,17 @@ $.fn.Croper = function( options ) {
                 y : 0
             }
 
+            // Клонируем картинку для того что бы узнать размеры скрытой картинки
+            var src = $img.attr('src')
+              , img = new Image();
+            img.src = src;
+
             // Заменяем нерабочие функции excanvas в IE
             ctx.setTransform = function (scaleX, offsetX, offsetY, scaleY, x, y) {
                 startCoords = {x: x,y: y};
                 
-                zoomWidth = $img.width()*scaleX;
-                zoomHeight = $img.height()*scaleY;
+                zoomWidth = img.width*scaleX;
+                zoomHeight = img.height*scaleY;
 
                 return false;
             }
@@ -194,15 +203,14 @@ $.fn.Croper = function( options ) {
                 return false;
             }
             ctx.translate = function ( x,y ) {
-                console.log('startCoords.x: ', startCoords.x);
                 startCoords.x += x;
                 startCoords.y += y;
                 return false;
             }
 
 
-            zoomWidth = $img.width()*scale;
-            zoomHeight = $img.height()*scale;
+            zoomWidth = img.width*scale;
+            zoomHeight = img.height*scale;
         }
 
         /**
@@ -212,7 +220,6 @@ $.fn.Croper = function( options ) {
         function drawImg () {            
             if ( isIE ) {
                 // Координаты с учетом зума для эмулиции scale
-                console.log(startCoords.x);
                 var x = (startCoords.x*scale)
                   , y = (startCoords.y*scale);
 
